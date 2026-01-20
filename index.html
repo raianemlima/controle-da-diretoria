@@ -11,7 +11,7 @@
 
 <header class="main-header">
     <h1>Painel de Controle de Expedientes</h1>
-    <p>Diretora: Raiane Maiara de Lima | Juiz Titular: Dr. Ramon</p>
+    <p>Diretora: Raiane Maiara de Lima | Matrícula: 54849 [cite: 14]</p>
 </header>
 
 <section class="form-container">
@@ -20,14 +20,23 @@
         <input type="text" id="procNum" placeholder="Ex: 0011774-26.2013...">
     </div>
     <div class="input-box">
-        <label>Tarefa / Fila PJE</label>
+        <label>Tarefa / Assunto</label>
         <input type="text" id="procTask" placeholder="Ex: Minutar Sentença">
     </div>
     <div class="input-box">
         <label>Última Movimentação</label>
         <input type="date" id="procDate">
     </div>
+    <div class="input-box">
+        <label>Destino Inicial</label>
+        <select id="procCol">
+            <option value="todo">Para Fazer</option>
+            <option value="siper">SIPER (Perícias)</option>
+            <option value="cati">CATI TJCE (Chamados)</option>
+        </select>
+    </div>
     <button id="addBtn">Adicionar Processo</button>
+    <button onclick="carregarAcervoPorAssunto()" style="background: #28a745;">Importar Críticos </button>
 </section>
 
 <main class="kanban-board">
@@ -42,6 +51,10 @@
     <div class="column">
         <h3>Gargalo (>300 dias)</h3>
         <div class="list" id="urgent"></div>
+    </div>
+    <div class="column">
+        <h3>CATI TJCE (Chamados)</h3>
+        <div class="list" id="cati"></div>
     </div>
     <div class="column">
         <h3>Concluído</h3>

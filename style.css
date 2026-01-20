@@ -1,39 +1,29 @@
 :root {
     --primary: #005b96;
     --danger: #d9534f;
-    --warning: #f0ad4e;
-    --success: #5cb85c;
+    --warning: #f39c12; /* Cor para CATI */
+    --siper: #6f42c1;
     --bg: #f4f7f6;
 }
 
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-
 .main-header { background: var(--primary); color: white; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
-
-.form-container { background: white; padding: 20px; border-radius: 8px; display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.form-container { background: white; padding: 20px; border-radius: 8px; display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); align-items: flex-end; }
 .input-box { display: flex; flex-direction: column; gap: 5px; }
-input, button { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+input, select, button { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
 button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
 
-.kanban-board { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; }
-.column { background: #ebedf0; border-radius: 6px; min-width: 280px; min-height: 60vh; }
-.column h3 { text-align: center; color: #333; padding: 10px; border-bottom: 2px solid #ddd; }
+.kanban-board { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 20px; }
+.column { background: #ebedf0; border-radius: 6px; min-width: 260px; min-height: 60vh; flex: 1; }
+.column h3 { text-align: center; color: #333; padding: 10px; border-bottom: 2px solid #ddd; font-size: 14px; }
 .list { padding: 10px; min-height: 150px; }
 
-/* Estilo dos Cartões */
 .card { background: white; border-radius: 4px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: grab; position: relative; border-left: 5px solid #ccc; }
-.card .title { font-weight: bold; color: var(--primary); display: block; margin-bottom: 5px; }
-.card .desc { font-size: 13px; color: #555; }
-.card .days { font-size: 11px; margin-top: 10px; color: #888; display: block; }
+.card.ancient { border-left-color: var(--danger); background: #fff5f5; }
+.card.siper-task { border-left-color: var(--siper); }
+.card.cati-task { border-left-color: var(--warning); border-style: dashed; }
 
-/* Alertas de Antiguidade baseados no Acervo */
-.card.ancient { border-left-color: var(--danger); background: #fff5f5; border: 1px solid var(--danger); animation: pulse 2s infinite; }
-.card.siper-task { border-left-color: #6f42c1; }
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
-}
-
+.card .title { font-weight: bold; color: var(--primary); display: block; margin-bottom: 5px; font-size: 12px; }
+.card .desc { font-size: 11px; color: #555; }
+.card .days { font-size: 10px; margin-top: 8px; color: #888; display: block; }
 .delete-btn { position: absolute; top: 5px; right: 5px; cursor: pointer; color: #ccc; }
