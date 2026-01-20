@@ -3,50 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão 2ª Vara Cível - Aracati</title>
+    <title>Gestão 2ª Vara - Aracati</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
-        :root { --primary: #004a8d; --secondary: #f39c12; --danger: #e74c3c; --siper: #8e44ad; --bg: #f8f9fa; --alert-bg: #fff9e6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; color: #333; }
+        :root { --primary: #004a8d; --secondary: #f39c12; --danger: #e74c3c; --siper: #8e44ad; --bg: #f1f3f5; --alert-bg: #fff9e6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        header { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        header { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
         .progress-container { flex-grow: 1; margin: 0 40px; background: rgba(255,255,255,0.2); height: 12px; border-radius: 6px; position: relative; overflow: hidden; }
         .progress-bar { height: 100%; background: #27ae60; width: 0%; transition: width 0.5s ease; }
         .progress-label { position: absolute; width: 100%; text-align: center; font-size: 9px; line-height: 12px; font-weight: bold; }
 
-        .toolbar { background: white; padding: 12px 20px; display: flex; gap: 10px; border-bottom: 1px solid #ddd; align-items: center; }
-        .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s; }
-        .btn-primary { background: var(--primary); color: white; border: none; }
+        .toolbar { background: white; padding: 10px 20px; display: flex; gap: 10px; border-bottom: 1px solid #ddd; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; font-size: 11px; font-weight: 600; }
 
-        .kanban-board { display: flex; gap: 15px; padding: 15px; flex-grow: 1; overflow-x: auto; }
-        .column { background: #e9ecef; border-radius: 10px; min-width: 290px; display: flex; flex-direction: column; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .column h3 { padding: 12px; margin: 0; font-size: 13px; text-transform: uppercase; color: #555; background: #dee2e6; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; }
+        .kanban-board { display: flex; gap: 15px; padding: 15px; flex-grow: 1; overflow-x: auto; align-items: flex-start; }
+        .column { background: #e9ecef; border-radius: 10px; min-width: 300px; max-height: 95%; display: flex; flex-direction: column; }
+        .column h3 { padding: 12px; margin: 0; font-size: 12px; text-transform: uppercase; color: #555; background: #dee2e6; border-radius: 10px 10px 0 0; text-align: center; }
         .list { padding: 10px; flex-grow: 1; overflow-y: auto; min-height: 100px; }
 
-        /* Estilo dos Cartões e Alerta de Inatividade */
-        .card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); cursor: grab; border-left: 6px solid #adb5bd; position: relative; }
+        /* Estilo dos Cartões e Alertas */
+        .card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 6px solid #adb5bd; position: relative; }
         .card.urgent-meta { border-left-color: var(--danger); background: #fff5f5; }
+        .card.stagnant-alert { animation: blink-bg 2.5s infinite; border-right: 4px solid var(--secondary); }
+        @keyframes blink-bg { 0%, 100% { background-color: white; } 50% { background-color: var(--alert-bg); } }
         
-        /* Alerta de 20 dias (Piscar Suave) */
-        .card.stagnant-alert { 
-            animation: blink-bg 2.5s infinite; 
-            border-right: 4px solid var(--secondary);
-        }
-        @keyframes blink-bg {
-            0% { background-color: white; }
-            50% { background-color: var(--alert-bg); }
-            100% { background-color: white; }
-        }
+        .proc-num { font-weight: 700; color: var(--primary); font-size: 12px; display: block; margin-bottom: 4px; }
+        .proc-task { font-size: 11px; color: #444; }
+        .card-footer { display: flex; justify-content: space-between; margin-top: 10px; font-size: 10px; color: #888; border-top: 1px solid #eee; padding-top: 5px; }
 
-        .card.siper-task { border-left-color: var(--siper); }
-        .card.cati-task { border-left-color: var(--secondary); }
-        .proc-num { font-weight: 700; color: var(--primary); font-size: 12px; margin-bottom: 4px; display: block; }
-        .proc-task { font-size: 11px; color: #444; line-height: 1.4; }
-        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 10px; color: #777; border-top: 1px solid #eee; padding-top: 6px; }
+        /* Modal de Cadastro (Oculto por padrão) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 350px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+        .modal-content h2 { margin: 0 0 20px 0; font-size: 18px; color: var(--primary); }
+        input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
 
-        .add-modal { position: fixed; bottom: 20px; left: 20px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); width: 260px; z-index: 100; }
+        /* Botão Flutuante (FAB) */
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 999; transition: transform 0.2s; }
+        .fab:hover { transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -61,155 +57,39 @@
 </header>
 
 <div class="toolbar">
-    <button class="btn btn-primary" onclick="importarAcervoCompleto()">Importar Relatório Completo</button>
+    <button class="btn btn-primary" onclick="importarRelatorioCompleto()">Importar Acervo Relatório</button>
     <button class="btn" onclick="exportarPDF()">Exportar PDF Diário</button>
+    <button class="btn" onclick="limparBanco()" style="color: var(--danger); border-color: var(--danger); margin-left: auto;">Limpar Dados</button>
 </div>
 
 <div class="kanban-board">
-    <div class="column"><h3>Gargalo Meta 2 <div class="list" id="urgent"></div></div>
-    <div class="column"><h3>Para Fazer <div class="list" id="todo"></div></div>
-    <div class="column"><h3>SIPER / Perícias <div class="list" id="siper"></div></div>
-    <div class="column"><h3>CATI TJCE <div class="list" id="cati"></div></div>
-    <div class="column"><h3>Concluído <div class="list" id="done"></div></div>
+    <div class="column"><h3>Gargalo Meta 2</h3><div class="list" id="urgent"></div></div>
+    <div class="column"><h3>Para Fazer</h3><div class="list" id="todo"></div></div>
+    <div class="column"><h3>SIPER / Perícias</h3><div class="list" id="siper"></div></div>
+    <div class="column"><h3>CATI TJCE</h3><div class="list" id="cati"></div></div>
+    <div class="column"><h3>Concluído</h3><div class="list" id="done"></div></div>
 </div>
 
-<div class="add-modal">
-    <input type="text" id="pNum" placeholder="Número do Processo" style="width:100%; padding:8px; margin-bottom:8px;">
-    <input type="text" id="pTask" placeholder="Assunto/Tarefa" style="width:100%; padding:8px; margin-bottom:8px;">
-    <input type="date" id="pDate" style="width:100%; padding:8px; margin-bottom:8px;">
-    <select id="pCol" style="width:100%; padding:8px; margin-bottom:8px;">
-        <option value="todo">Fila Comum</option>
-        <option value="siper">Perícia (SIPER)</option>
-        <option value="cati">Chamado CATI</option>
-    </select>
-    <button onclick="adicionarProcesso()" style="width:100%; background:var(--primary); color:white; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">Cadastrar Processo</button>
+<button class="fab" onclick="toggleModal()">+</button>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+        <h2>Novo Processo</h2>
+        <input type="text" id="pNum" placeholder="Número do Processo">
+        <input type="text" id="pTask" placeholder="Assunto (Ex: [GAB] Sentença)">
+        <input type="date" id="pDate">
+        <select id="pCol">
+            <option value="todo">Fila Comum</option>
+            <option value="siper">Perícia (SIPER)</option>
+            <option value="cati">Chamado CATI</option>
+        </select>
+        <div style="display:flex; gap:10px;">
+            <button onclick="adicionarProcesso()" style="flex:2; background:var(--primary); color:white; border:none; padding:12px; border-radius:6px; cursor:pointer; font-weight:bold;">Cadastrar</button>
+            <button onclick="toggleModal()" style="flex:1; background:#eee; border:none; padding:12px; border-radius:6px; cursor:pointer;">Fechar</button>
+        </div>
+    </div>
 </div>
 
-<script>
-let db = JSON.parse(localStorage.getItem('vara_aracati_acervo')) || [];
-
-function save() {
-    localStorage.setItem('vara_aracati_acervo', JSON.stringify(db));
-    render();
-}
-
-function adicionarProcesso() {
-    const num = document.getElementById('pNum').value;
-    const task = document.getElementById('pTask').value;
-    const date = document.getElementById('pDate').value;
-    const col = document.getElementById('pCol').value;
-    if(num && date) {
-        db.push({ id: Date.now(), num, task, date, col, concludedDate: null });
-        save();
-    }
-}
-
-function render() {
-    const columns = ['urgent', 'todo', 'siper', 'cati', 'done'];
-    columns.forEach(c => document.getElementById(c).innerHTML = '');
-    
-    let metaTotal = 0, metaDone = 0;
-    const hoje = new Date();
-
-    db.forEach(p => {
-        const days = Math.floor((hoje - new Date(p.date)) / (1000 * 60 * 60 * 24));
-        let col = p.col;
-
-        const isMeta2 = days > 300;
-        if(isMeta2) metaTotal++;
-        if(isMeta2 && p.col === 'todo') col = 'urgent';
-        if(isMeta2 && p.col === 'done') metaDone++;
-
-        const card = document.createElement('div');
-        // Alerta de Inatividade se > 20 dias e não concluído
-        const stagnant = (days > 20 && col !== 'done') ? 'stagnant-alert' : '';
-        
-        card.className = `card ${isMeta2 && col !== 'done' ? 'urgent-meta' : ''} ${stagnant} ${p.col === 'siper' || p.task.includes('Perícia') ? 'siper-task' : ''} ${p.col === 'cati' ? 'cati-task' : ''}`;
-        card.dataset.id = p.id;
-        card.innerHTML = `
-            <span class="proc-num">${p.num}</span>
-            <div class="proc-task">${p.task}</div>
-            <div class="card-footer">
-                <span>Últ. Mov: ${p.date.split('-').reverse().join('/')}</span>
-                <strong>${days}d parado</strong>
-            </div>
-        `;
-        document.getElementById(col).appendChild(card);
-    });
-
-    const perc = metaTotal > 0 ? Math.round((metaDone / metaTotal) * 100) : 0;
-    document.getElementById('meta-progress').style.width = perc + '%';
-    document.getElementById('meta-perc').innerText = perc;
-    initDrag();
-}
-
-function importarAcervoCompleto() {
-    const totalAcervo = [
-        // Página 1 e 2 [cite: 12, 19]
-        { num: "0011774-26.2013.8.06.0035", task: "[EF] Pendentes RENAJUD", date: "2025-01-31", col: "todo" },
-        { num: "0011286-42.2011.8.06.0035", task: "[EF] Dívida Ativa", date: "2025-01-31", col: "todo" },
-        { num: "0051403-60.2020.8.06.0035", task: "[GAB] Minutar Sentença", date: "2025-02-11", col: "todo" },
-        { num: "0202634-95.2024.8.06.0035", task: "[SIPER] Nomeação Curatela", date: "2025-06-03", col: "siper" },
-        
-        // Página 3 e 4 [cite: 25, 35]
-        { num: "0201624-16.2024.8.06.0035", task: "[SEC] Analisar Manifestação", date: "2025-06-10", col: "todo" },
-        { num: "0201013-34.2022.8.06.0035", task: "[SIPER] Gerenciar Perícia", date: "2025-06-20", col: "siper" },
-        
-        // Página 5 [cite: 55, 67, 93, 115, 149]
-        { num: "0051191-05.2021.8.06.0035", task: "[SEC] Honorários Periciais", date: "2025-06-26", col: "todo" },
-        { num: "0201395-56.2024.8.06.0035", task: "[SEC] Usucapião", date: "2025-06-26", col: "todo" },
-        { num: "0014250-61.2018.8.06.0035", task: "[SEC] Expedir Documentos", date: "2025-06-27", col: "todo" },
-        { num: "0000427-83.2019.8.06.0035", task: "[SEC] Analisar Manifestação", date: "2025-06-29", col: "todo" },
-        { num: "3002072-82.2025.8.06.0035", task: "[SEC] Incapacidade Laborativa", date: "2025-06-30", col: "todo" },
-
-        // Página 6 e 7 [cite: 240, 248]
-        { num: "3003642-74.2023.8.06.0035", task: "[SEC] Paridade Salarial", date: "2025-07-04", col: "todo" },
-        { num: "0200450-35.2025.8.06.0035", task: "[SIPER] Perícia Guarda", date: "2025-07-04", col: "siper" },
-        { num: "3002400-46.2024.8.06.0035", task: "[SEC] PASEP", date: "2025-07-15", col: "todo" },
-        
-        // Página 8 
-        { num: "3001745-40.2025.8.06.0035", task: "[SEC] Testamento", date: "2025-07-22", col: "todo" }
-    ];
-
-    totalAcervo.forEach(a => {
-        if(!db.find(p => p.num === a.num)) db.push({ id: Date.now() + Math.random(), ...a });
-    });
-    save();
-}
-
-function initDrag() {
-    document.querySelectorAll('.list').forEach(l => {
-        new Sortable(l, { group: 'kanban', animation: 150, onEnd: evt => {
-            const id = evt.item.dataset.id;
-            const idx = db.findIndex(p => p.id == id);
-            const target = evt.to.id;
-            db[idx].col = target;
-            if(target === 'done') db[idx].concludedDate = new Date().toLocaleDateString();
-            save();
-        }});
-    });
-}
-
-function exportarPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const hoje = new Date().toLocaleDateString();
-    const concluidos = db.filter(p => p.col === 'done' && p.concludedDate === hoje);
-    
-    if (concluidos.length === 0) return alert("Nada concluído hoje.");
-
-    doc.setFontSize(14); doc.text("PRODUTIVIDADE - 2ª VARA CÍVEL ARACATI", 105, 20, {align:"center"});
-    doc.setFontSize(10); doc.text(`Diretora: Raiane Lima | Data: ${hoje}`, 105, 30, {align:"center"});
-    
-    doc.autoTable({
-        startY: 40,
-        head: [['Processo', 'Tarefa', 'Status']],
-        body: concluidos.map(p => [p.num, p.task, 'CONCLUÍDO'])
-    });
-    doc.save(`Produtividade_${hoje.replace(/\//g,'-')}.pdf`);
-}
-
-window.onload = render;
-</script>
+<script src="script.js"></script>
 </body>
 </html>
