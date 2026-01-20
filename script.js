@@ -1,95 +1,31 @@
-const addBtn = document.getElementById('addBtn');
-let processes = JSON.parse(localStorage.getItem('vara_aracati_db')) || [];
-
-addBtn.addEventListener('click', () => {
-    const num = document.getElementById('procNum').value;
-    const task = document.getElementById('procTask').value;
-    const date = document.getElementById('procDate').value;
-
-    if (!num || !date) return alert("Preencha o número e a data da última movimentação.");
-
-    const newProc = {
-        id: Date.now(),
-        num,
-        task,
-        date,
-        column: "todo"
-    };
-
-    processes.push(newProc);
-    saveAndRender();
-    clearInputs();
-});
-
-function calculateDays(dateString) {
-    const lastMov = new Date(dateString);
-    const today = new Date();
-    const diff = Math.floor((today - lastMov) / (1000 * 60 * 60 * 24));
-    return diff;
-}
-
-function saveAndRender() {
-    localStorage.setItem('vara_aracati_db', JSON.stringify(processes));
-    render();
-}
-
-function render() {
-    const lists = ['todo', 'siper', 'urgent', 'done'];
-    lists.forEach(id => document.getElementById(id).innerHTML = '');
-
-    processes.forEach(p => {
-        const days = calculateDays(p.date);
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.dataset.id = p.id;
+function carregarAcervoIncial() {
+    const dadosRelatorio = [
+        // Gargalo de 2025
+        { num: "0011774-26.2013.8.06.0035", task: "Pendentes RENAJUD", date: "2025-01-31", col: "urgent" },
+        { num: "0011286-42.2011.8.06.0035", task: "Dívida Ativa", date: "2025-01-31", col: "urgent" },
+        { num: "0051403-60.2020.8.06.0035", task: "Minutar Sentença", date: "2025-02-11", col: "urgent" },
+        { num: "0200587-85.2023.8.06.0035", task: "Assinar Sentença", date: "2025-02-12", col: "urgent" },
+        { num: "0050268-76.2021.8.06.0035", task: "Minutar Sentença", date: "2025-02-13", col: "urgent" },
         
-        // Se o processo está parado há mais de 300 dias (ex: relatório de Jan/2026 )
-        if (days > 300) card.classList.add('ancient');
-        if (p.task.toLowerCase().includes('pericia') || p.task.toLowerCase().includes('siper')) {
-            card.classList.add('siper-task');
+        // SIPER / Perícias
+        { num: "0202634-95.2024.8.06.0035", task: "Gerenciar Perícia", date: "2025-06-03", col: "siper" },
+        { num: "0000297-95.2018.8.06.0078", task: "Gerenciar Perícia", date: "2025-06-04", col: "siper" },
+        { num: "0051083-73.2021.8.06.0035", task: "Gerenciar Perícia", date: "2025-06-06", col: "siper" },
+        { num: "0001422-33.2018.8.06.0035", task: "Gerenciar Perícia", date: "2025-06-20", col: "siper" },
+        { num: "0202605-45.2024.8.06.0035", task: "Gerenciar Perícia", date: "2025-06-20", col: "siper" }
+    ];
+
+    let db = JSON.parse(localStorage.getItem('kanban_2vara_aracati')) || [];
+    
+    dadosRelatorio.forEach(item => {
+        if (!db.find(p => p.num === item.num)) { // Evita duplicatas
+            db.push({ id: Date.now() + Math.random(), ...item });
         }
-
-        card.innerHTML = `
-            <span class="delete-btn" onclick="removeProc(${p.id})">×</span>
-            <span class="title">${p.num}</span>
-            <span class="desc">${p.task}</span>
-            <span class="days">Parado há ${days} dias</span>
-        `;
-
-        // Lógica de destino automático se for muito antigo
-        let targetCol = p.column;
-        if (days > 300 && p.column !== 'done') targetCol = 'urgent';
-
-        document.getElementById(targetCol).appendChild(card);
     });
 
-    initDragAndDrop();
+    localStorage.setItem('kanban_2vara_aracati', JSON.stringify(db));
+    location.reload(); // Atualiza a tela para mostrar os cartões
 }
 
-function initDragAndDrop() {
-    document.querySelectorAll('.list').forEach(list => {
-        new Sortable(list, {
-            group: 'kanban',
-            animation: 150,
-            onEnd: (evt) => {
-                const id = evt.item.dataset.id;
-                const newCol = evt.to.id;
-                const index = processes.findIndex(p => p.id == id);
-                processes[index].column = newCol;
-                localStorage.setItem('vara_aracati_db', JSON.stringify(processes));
-            }
-        });
-    });
-}
-
-function removeProc(id) {
-    processes = processes.filter(p => p.id != id);
-    saveAndRender();
-}
-
-function clearInputs() {
-    document.getElementById('procNum').value = '';
-    document.getElementById('procTask').value = '';
-}
-
-window.onload = render;
+// Chame esta função no console do navegador ou adicione temporariamente ao window.onload
+// carregarAcervoIncial();
