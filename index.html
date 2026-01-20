@@ -3,174 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard 2ª Vara - Aracati</title>
+    <title>Gestão Integrada - 2ª Vara Aracati</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
-        :root {
-            --primary: #004a8d; --secondary: #f39c12; --danger: #e74c3c;
-            --success: #27ae60; --siper: #8e44ad; --bg: #f0f2f5;
-        }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        :root { --primary: #004a8d; --secondary: #f39c12; --danger: #e74c3c; --siper: #8e44ad; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; color: #333; }
         
-        header { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .stats { display: flex; gap: 20px; font-size: 14px; }
-        
-        .toolbar { background: white; padding: 15px; display: flex; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid #ddd; }
-        .filter-btn { padding: 8px 15px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-size: 12px; }
-        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        header { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .progress-container { flex-grow: 1; margin: 0 40px; background: rgba(255,255,255,0.2); height: 12px; border-radius: 6px; position: relative; overflow: hidden; }
+        .progress-bar { height: 100%; background: #27ae60; width: 0%; transition: width 0.5s ease; }
+        .progress-label { position: absolute; width: 100%; text-align: center; font-size: 9px; line-height: 12px; font-weight: bold; }
 
-        .kanban-board { display: flex; gap: 15px; padding: 15px; flex-grow: 1; overflow-x: auto; align-items: flex-start; }
-        .column { background: #ebedf0; border-radius: 8px; min-width: 300px; display: flex; flex-direction: column; max-height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .column h3 { padding: 15px; margin: 0; background: rgba(0,0,0,0.02); font-size: 14px; text-transform: uppercase; color: #666; display: flex; justify-content: space-between; }
-        .list { padding: 10px; overflow-y: auto; flex-grow: 1; min-height: 100px; }
+        .toolbar { background: white; padding: 12px 20px; display: flex; gap: 10px; border-bottom: 1px solid #ddd; align-items: center; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; border: none; }
+        .btn-danger { background: var(--danger); color: white; border: none; }
 
-        .card { background: white; border-radius: 6px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: grab; border-left: 5px solid #ccc; position: relative; }
-        .card .badge { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 2px 6px; border-radius: 10px; background: #eee; }
-        .card.meta2 { border-left-color: var(--danger); background: #fff8f8; }
+        .kanban-board { display: flex; gap: 15px; padding: 15px; flex-grow: 1; overflow-x: auto; }
+        .column { background: #e9ecef; border-radius: 10px; min-width: 290px; display: flex; flex-direction: column; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .column h3 { padding: 12px; margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #555; background: #dee2e6; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; }
+        .list { padding: 10px; flex-grow: 1; overflow-y: auto; min-height: 100px; }
+
+        .card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); cursor: grab; border-left: 6px solid #adb5bd; position: relative; }
+        .card.urgent-meta { border-left-color: var(--danger); background: #fff5f5; }
         .card.siper-task { border-left-color: var(--siper); }
         .card.cati-task { border-left-color: var(--secondary); }
-        
-        .proc-num { font-weight: bold; color: var(--primary); display: block; margin-bottom: 5px; }
-        .proc-task { font-size: 13px; font-weight: 500; }
-        .proc-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11px; color: #888; border-top: 1px solid #eee; padding-top: 5px; }
-        
-        .modal { position: fixed; bottom: 20px; right: 20px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); width: 250px; z-index: 100; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        .btn-add { background: var(--success); color: white; border: none; padding: 10px; width: 100%; margin-top: 10px; border-radius: 4px; cursor: pointer; }
+        .proc-num { font-weight: 700; color: var(--primary); font-size: 12px; margin-bottom: 4px; display: block; }
+        .proc-task { font-size: 11px; color: #444; line-height: 1.4; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 10px; color: #777; border-top: 1px solid #eee; padding-top: 6px; }
+
+        .add-modal { position: fixed; bottom: 20px; left: 20px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); width: 260px; z-index: 100; }
     </style>
 </head>
 <body>
 
 <header>
-    <div>
-        <strong>2ª VARA CÍVEL - ARACATI</strong> | Raiane Lima (Matrícula: 54849)
+    <div style="font-size: 14px;"><strong>DIREÇÃO DE SECRETARIA</strong> | Raiane Lima</div>
+    <div class="progress-container">
+        <div class="progress-bar" id="meta-progress"></div>
+        <div class="progress-label">SANEAMENTO META 2 (CONCLUÍDO <span id="meta-perc">0</span>%)</div>
     </div>
-    <div class="stats">
-        <span>Gargalo: <strong id="count-urgent">0</strong></span>
-        <span>SIPER: <strong id="count-siper">0</strong></span>
-        <span>CATI: <strong id="count-cati">0</strong></span>
-    </div>
+    <div style="font-size: 11px;">2ª Vara Cível de Aracati</div>
 </header>
 
 <div class="toolbar">
-    <button class="filter-btn active" onclick="filterBy('all')">Todos</button>
-    <button class="filter-btn" onclick="filterBy('FISCAL')">Execução Fiscal</button>
-    <button class="filter-btn" onclick="filterBy('FAMÍLIA')">Família / SIPER</button>
-    <button class="filter-btn" onclick="filterBy('CÍVEL')">Cível / Indenização</button>
-    <button onclick="calcBusinessDaysModal()" style="margin-left: auto; border: none; background: none; cursor: pointer; text-decoration: underline; font-size: 12px;">Calculadora CPC</button>
+    <button class="btn btn-primary" onclick="importarListaCompleta()">Importar Acervo Relatório (Pág 1-8)</button>
+    <button class="btn" onclick="exportarPDF()">Exportar Relatório PDF</button>
+    <button class="btn btn-danger" onclick="limparBanco()" style="margin-left: auto;">Limpar Tudo</button>
 </div>
 
 <div class="kanban-board">
-    <div class="column" id="col-todo"><h3>Para Fazer <span class="count"></span></h3><div class="list" id="todo"></div></div>
-    <div class="column" id="col-siper"><h3>SIPER / Perícias <span class="count"></span></h3><div class="list" id="siper"></div></div>
-    <div class="column" id="col-urgent"><h3>Gargalo Meta 2 <span class="count"></span></h3><div class="list" id="urgent"></div></div>
-    <div class="column" id="col-cati"><h3>CATI TJCE <span class="count"></span></h3><div class="list" id="cati"></div></div>
-    <div class="column" id="col-done"><h3>Concluído <span class="count"></span></h3><div class="list" id="done"></div></div>
+    <div class="column"><h3>Gargalo Meta 2 <span id="count-urgent"></span></h3><div class="list" id="urgent"></div></div>
+    <div class="column"><h3>Para Fazer <span id="count-todo"></span></h3><div class="list" id="todo"></div></div>
+    <div class="column"><h3>SIPER / Perícias <span id="count-siper"></span></h3><div class="list" id="siper"></div></div>
+    <div class="column"><h3>CATI TJCE <span id="count-cati"></span></h3><div class="list" id="cati"></div></div>
+    <div class="column"><h3>Concluído <span id="count-done"></span></h3><div class="list" id="done"></div></div>
 </div>
 
-<div class="modal">
-    <strong>Novo Expediente</strong>
-    <input type="text" id="procNum" placeholder="Número do Processo">
-    <input type="text" id="procTask" placeholder="Assunto (Ex: [CÍVEL] Sentença)">
-    <input type="date" id="procDate">
-    <select id="procCol">
+<div class="add-modal">
+    <input type="text" id="pNum" placeholder="Número do Processo" style="width:100%; padding:8px; margin-bottom:8px;">
+    <input type="text" id="pTask" placeholder="Assunto/Tarefa" style="width:100%; padding:8px; margin-bottom:8px;">
+    <input type="date" id="pDate" style="width:100%; padding:8px; margin-bottom:8px;">
+    <select id="pCol" style="width:100%; padding:8px; margin-bottom:8px;">
         <option value="todo">Fila Comum</option>
         <option value="siper">Perícia (SIPER)</option>
         <option value="cati">Chamado CATI</option>
     </select>
-    <button class="btn-add" onclick="addNew()">Adicionar à Fila</button>
-    <button onclick="importarCriticos()" style="font-size: 10px; background: none; border: none; color: blue; cursor: pointer; margin-top: 5px;">Importar do Relatório</button>
+    <button onclick="adicionarProcesso()" style="width:100%; background:var(--primary); color:white; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">Cadastrar Processo</button>
 </div>
 
-<script>
-    let db = JSON.parse(localStorage.getItem('vara2_db')) || [];
-
-    function addNew() {
-        const num = document.getElementById('procNum').value;
-        const task = document.getElementById('procTask').value;
-        const date = document.getElementById('procDate').value;
-        const col = document.getElementById('procCol').value;
-        if(!num || !date) return alert("Preencha Número e Data.");
-        db.push({ id: Date.now(), num, task, date, col });
-        save();
-    }
-
-    function save() { localStorage.setItem('vara2_db', JSON.stringify(db)); render(); }
-
-    function render(filter = 'all') {
-        const lists = ['todo', 'siper', 'urgent', 'cati', 'done'];
-        lists.forEach(l => document.getElementById(l).innerHTML = '');
-        let counts = { urgent: 0, siper: 0, cati: 0 };
-
-        db.forEach(p => {
-            if(filter !== 'all' && !p.task.toUpperCase().includes(filter)) return;
-
-            const days = Math.floor((new Date() - new Date(p.date)) / (1000 * 60 * 60 * 24));
-            let finalCol = p.col;
-            if(days > 300 && p.col === 'todo') finalCol = 'urgent';
-            
-            if(finalCol === 'urgent') counts.urgent++;
-            if(finalCol === 'siper') counts.siper++;
-            if(finalCol === 'cati') counts.cati++;
-
-            const card = document.createElement('div');
-            card.className = `card ${days > 300 ? 'meta2' : ''} ${finalCol === 'siper' ? 'siper-task' : ''} ${finalCol === 'cati' ? 'cati-task' : ''}`;
-            card.dataset.id = p.id;
-            card.innerHTML = `
-                <span class="badge">${days > 300 ? 'META 2' : 'URGENTE'}</span>
-                <span class="proc-num">${p.num}</span>
-                <div class="proc-task">${p.task}</div>
-                <div class="proc-footer">
-                    <span>${p.date.split('-').reverse().join('/')}</span>
-                    <strong>${days} dias</strong>
-                    <button onclick="remove(${p.id})" style="border:none; background:none; cursor:pointer;">×</button>
-                </div>
-            `;
-            document.getElementById(finalCol).appendChild(card);
-        });
-
-        document.getElementById('count-urgent').innerText = counts.urgent;
-        document.getElementById('count-siper').innerText = counts.siper;
-        document.getElementById('count-cati').innerText = counts.cati;
-        initDrag();
-    }
-
-    function initDrag() {
-        document.querySelectorAll('.list').forEach(l => {
-            new Sortable(l, { group: 'kanban', animation: 150, onEnd: evt => {
-                const id = evt.item.dataset.id;
-                const idx = db.findIndex(p => p.id == id);
-                db[idx].col = evt.to.id;
-                save();
-            }});
-        });
-    }
-
-    function filterBy(subject) {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-        render(subject);
-    }
-
-    function importarCriticos() {
-        const criticos = [
-            { num: "0011774-26.2013.8.06.0035", task: "[FISCAL] Pendentes RENAJUD", date: "2025-01-31", col: "todo" },
-            { num: "0202634-95.2024.8.06.0035", task: "[FAMÍLIA] Perícia Curatela", date: "2025-06-03", col: "siper" },
-            { num: "0051403-60.2020.8.06.0035", task: "[CÍVEL] Minutar Sentença", date: "2025-02-11", col: "todo" }
-        ];
-        criticos.forEach(c => { if(!db.find(p => p.num === c.num)) db.push({id: Date.now()+Math.random(), ...c}); });
-        save();
-    }
-
-    function remove(id) { db = db.filter(p => p.id !== id); save(); }
-    window.onload = () => render();
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
-<button onclick="exportarPDF()" style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold;">
-    Exportar PDF Diário
-</button>
