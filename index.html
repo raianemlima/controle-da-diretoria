@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard 2ª Vara - Aracati</title>
+    <title>Gestão 2ª Vara Cível - Aracati</title>
     
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -17,44 +17,60 @@
 
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        header { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* Proteção por Senha */
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        .login-box { background: white; padding: 30px; border-radius: 12px; display: flex; flex-direction: column; gap: 15px; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .login-box h2 { color: var(--primary); margin: 0; text-align: center; font-size: 18px; }
+        .login-box input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 18px; }
+        .login-box button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* Interface Principal */
+        header { background: var(--primary); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
         .progress-container { flex-grow: 1; margin: 0 40px; background: rgba(255,255,255,0.2); height: 14px; border-radius: 7px; position: relative; overflow: hidden; }
         .progress-bar { height: 100%; background: #27ae60; width: 0%; transition: width 0.5s ease; }
         .progress-label { position: absolute; width: 100%; text-align: center; font-size: 10px; line-height: 14px; font-weight: bold; }
 
-        .toolbar { background: white; padding: 10px 20px; display: flex; gap: 8px; border-bottom: 1px solid #ddd; align-items: center; flex-wrap: wrap; }
-        .btn { padding: 6px 12px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
-        .btn-main { background: var(--primary); color: white; border: none; }
-        .btn-util { background: #2c3e50; color: white; border: none; }
+        .toolbar { background: white; padding: 10px 20px; display: flex; gap: 8px; border-bottom: 1px solid #ddd; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn { padding: 8px 14px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; font-size: 11px; font-weight: bold; }
 
+        /* Kanban */
         .kanban-board { display: flex; gap: 15px; padding: 15px; flex-grow: 1; overflow-x: auto; align-items: flex-start; }
-        .column { background: #e9ecef; border-radius: 10px; min-width: 280px; max-height: 100%; display: flex; flex-direction: column; }
-        .column h3 { padding: 12px; margin: 0; font-size: 11px; text-transform: uppercase; color: #444; background: #dee2e6; border-radius: 10px 10px 0 0; text-align: center; border-bottom: 2px solid #ccc; }
+        .column { background: #e9ecef; border-radius: 10px; min-width: 290px; max-height: 100%; display: flex; flex-direction: column; }
+        .column h3 { padding: 12px; margin: 0; font-size: 11px; text-transform: uppercase; color: #444; background: #dee2e6; border-radius: 10px 10px 0 0; text-align: center; }
         .list { padding: 10px; flex-grow: 1; overflow-y: auto; min-height: 150px; }
 
-        .card { background: white; border-radius: 8px; padding: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #adb5bd; position: relative; }
+        /* Cartões */
+        .card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 6px solid #adb5bd; position: relative; }
         .card.urgent-meta { border-left-color: var(--danger); background: #fff5f5; }
-        .card.stagnant-alert { animation: blink-bg 3s infinite; border-right: 4px solid var(--secondary); }
+        .card.stagnant-alert { animation: blink-bg 3s infinite; border-right: 5px solid var(--secondary); }
         @keyframes blink-bg { 0%, 100% { background: white; } 50% { background: var(--alert-bg); } }
         .card.siper-task { border-left-color: var(--siper); }
         .card.cati-task { border-left-color: var(--secondary); }
         
-        .proc-num { font-weight: bold; color: var(--primary); font-size: 11px; display: block; }
-        .proc-task { font-size: 10px; color: #333; margin: 4px 0; }
-        .card-footer { display: flex; justify-content: space-between; font-size: 9px; color: #777; border-top: 1px solid #eee; padding-top: 5px; }
+        .proc-num { font-weight: bold; color: var(--primary); font-size: 12px; display: block; }
+        .proc-task { font-size: 11px; color: #333; margin: 4px 0; }
+        .card-footer { display: flex; justify-content: space-between; font-size: 10px; color: #777; border-top: 1px solid #eee; padding-top: 6px; }
 
-        /* Modais */
-        .fab { position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; border: none; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 1000; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 10px; width: 400px; max-width: 90%; }
-        textarea { width: 100%; height: 150px; margin-bottom: 10px; font-family: monospace; font-size: 11px; }
-        input, select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        /* Modais e FAB */
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 450px; max-width: 90%; }
+        textarea { width: 100%; height: 200px; margin-bottom: 15px; font-family: monospace; font-size: 11px; padding: 10px; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
+<div id="loginOverlay">
+    <div class="login-box">
+        <h2>Acesso 2ª Vara Cível</h2>
+        <input type="password" id="passInput" placeholder="Digite a Senha">
+        <button onclick="verificarAcesso()">Entrar</button>
+    </div>
+</div>
+
 <header>
-    <div style="font-size: 13px;"><strong>2ª VARA CÍVEL ARACATI</strong> | Raiane Lima</div>
+    <div style="font-size: 14px;"><strong>DIREÇÃO DE SECRETARIA</strong> | Raiane Lima</div>
     <div class="progress-container">
         <div class="progress-bar" id="meta-progress"></div>
         <div class="progress-label">SANEAMENTO META 2 (CONCLUÍDO <span id="meta-perc">0</span>%)</div>
@@ -62,14 +78,13 @@
 </header>
 
 <div class="toolbar">
-    <button class="btn btn-main" onclick="importarCargaTotal()">Importar 144 Processos (PDF)</button>
-    <button class="btn btn-util" onclick="toggleParser()">Processador de Texto</button>
-    <button class="btn" onclick="exportarPDF()">PDF Diário</button>
-    <button class="btn" onclick="exportarBackup()">Backup</button>
-    <label class="btn" style="background:#95a5a6; color:white;">
-        Restaurar <input type="file" onchange="importarBackup(event)" style="display:none;">
+    <button class="btn" onclick="abrirLeitor()" style="background:var(--primary); color:white; border:none;">Leitor de Relatório (PDF)</button>
+    <button class="btn" onclick="exportarPDF()">Exportar PDF Diário</button>
+    <button class="btn" onclick="baixarBackup()" style="background:#2c3e50; color:white; border:none;">💾 Backup</button>
+    <label class="btn" style="background:#95a5a6; color:white; cursor:pointer;">
+        📂 Restaurar <input type="file" onchange="restaurarBackup(event)" style="display:none;">
     </label>
-    <button class="btn" onclick="limparBanco()" style="color:var(--danger); border-color:var(--danger); margin-left:auto;">Limpar Tudo</button>
+    <button class="btn" onclick="limparSistema()" style="color:var(--danger); border-color:var(--danger); margin-left:auto;">Zerar Painel</button>
 </div>
 
 <div class="kanban-board">
@@ -80,170 +95,183 @@
     <div class="column"><h3>Concluído</h3><div class="list" id="done"></div></div>
 </div>
 
-<button class="fab" onclick="toggleModal()">+</button>
+<button class="fab" onclick="abrirCadastroManual()">+</button>
 
-<div class="modal-overlay" id="modalOverlay">
+<div class="modal-overlay" id="modalManual">
     <div class="modal-content">
-        <h3 style="margin:0 0 15px 0; color:var(--primary);">Novo Processo</h3>
-        <input type="text" id="pNum" placeholder="Número do Processo (0000000-00...)">
-        <input type="text" id="pTask" placeholder="Tarefa/Assunto">
-        <input type="date" id="pDate">
-        <select id="pCol">
+        <h3 style="margin-top:0; color:var(--primary);">Novo Expediente</h3>
+        <input type="text" id="mNum" placeholder="Número do Processo">
+        <input type="text" id="mTask" placeholder="Assunto/Tarefa">
+        <input type="date" id="mDate">
+        <select id="mCol">
             <option value="todo">Para Fazer</option>
             <option value="siper">SIPER / Perícia</option>
             <option value="cati">CATI TJCE</option>
         </select>
-        <button onclick="adicionarManual()" style="width:100%; background:var(--primary); color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer;">Cadastrar</button>
-        <button onclick="toggleModal()" style="width:100%; background:none; border:none; color:#666; margin-top:5px; cursor:pointer;">Cancelar</button>
+        <button onclick="salvarManual()" style="width:100%; background:var(--primary); color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">Cadastrar</button>
+        <button onclick="fecharModais()" style="width:100%; background:none; border:none; color:#666; margin-top:10px; cursor:pointer;">Cancelar</button>
     </div>
 </div>
 
-<div class="modal-overlay" id="parserOverlay">
-    <div class="modal-content" style="width:500px;">
-        <h3 style="margin:0 0 10px 0;">Leitor de Relatório (Copiar/Colar)</h3>
-        <p style="font-size:11px; color:#666;">Cole aqui o texto copiado do PDF do Painel de Acervo.</p>
-        <textarea id="rawText" placeholder="Cole o conteúdo do relatório aqui..."></textarea>
-        <button onclick="processarTexto()" style="width:100%; background:var(--primary); color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer;">Processar e Adicionar</button>
-        <button onclick="toggleParser()" style="width:100%; background:none; border:none; color:#666; margin-top:5px; cursor:pointer;">Fechar</button>
+<div class="modal-overlay" id="modalLeitor">
+    <div class="modal-content">
+        <h3 style="margin-top:0;">Leitor de Acervo (Copiar/Colar)</h3>
+        <p style="font-size:11px; color:#666; margin-bottom:10px;">Copie o texto das 8 páginas do PDF e cole abaixo. O sistema identificará os números e as datas automaticamente.</p>
+        <textarea id="textoBruto" placeholder="Cole o conteúdo do PDF aqui..."></textarea>
+        <button onclick="processarPDF()" style="width:100%; background:var(--primary); color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">Processar Processos</button>
+        <button onclick="fecharModais()" style="width:100%; background:none; border:none; color:#666; margin-top:10px; cursor:pointer;">Fechar</button>
     </div>
 </div>
 
 <script>
-let db = JSON.parse(localStorage.getItem('aracati_acervo_v3')) || [];
+// --- SEGURANÇA ---
+function verificarAcesso() {
+    const p = document.getElementById('passInput').value;
+    if(p === "RAIANED2026") {
+        document.getElementById('loginOverlay').style.display = 'none';
+        sessionStorage.setItem('autenticado', 'sim');
+    } else { alert("Acesso negado."); }
+}
+if(sessionStorage.getItem('autenticado') === 'sim') { document.getElementById('loginOverlay').style.display = 'none'; }
 
-function toggleModal() { const m = document.getElementById('modalOverlay'); m.style.display = (m.style.display==='flex')?'none':'flex'; }
-function toggleParser() { const p = document.getElementById('parserOverlay'); p.style.display = (p.style.display==='flex')?'none':'flex'; }
+// --- DADOS ---
+let db = JSON.parse(localStorage.getItem('aracati_db_v5')) || [];
 
-function save() { localStorage.setItem('aracati_acervo_v3', JSON.stringify(db)); render(); }
+function abrirLeitor() { document.getElementById('modalLeitor').style.display = 'flex'; }
+function abrirCadastroManual() { document.getElementById('modalManual').style.display = 'flex'; }
+function fecharModais() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
-function adicionarManual() {
-    const num = document.getElementById('pNum').value.trim();
-    const task = document.getElementById('pTask').value;
-    const date = document.getElementById('pDate').value;
-    const col = document.getElementById('pCol').value;
-    if(num && date) {
-        if(db.find(p => p.num === num)) return alert("Processo já cadastrado!");
-        db.push({ id: Date.now(), num, task, date, col, concludedDate: null });
-        save(); toggleModal();
-        document.getElementById('pNum').value = ''; document.getElementById('pTask').value = '';
-    }
+function atualizarDB() { localStorage.setItem('aracati_db_v5', JSON.stringify(db)); renderizar(); }
+
+function salvarManual() {
+    const num = document.getElementById('mNum').value.trim();
+    const task = document.getElementById('mTask').value;
+    const date = document.getElementById('mDate').value;
+    const col = document.getElementById('mCol').value;
+    
+    if(!num || !date) return alert("Preencha número e data.");
+    if(db.find(p => p.num === num)) return alert("Processo já existe no painel!");
+
+    db.push({ id: Date.now(), num, task, date, col, dataConclusao: null });
+    atualizarDB(); fecharModais();
+    document.getElementById('mNum').value = ''; document.getElementById('mTask').value = '';
 }
 
-function processarTexto() {
-    const text = document.getElementById('rawText').value;
-    const procRegex = /(\d{7}-\d{2}\.\d{4}\.8\.06\.\d{4})/g;
-    const dateRegex = /(\d{2}\/\d{2}\/\d{4})/g;
+// --- MOTOR DE LEITURA CORRIGIDO ---
+function processarPDF() {
+    const raw = document.getElementById('textoBruto').value;
+    // Limpeza: remove quebras de linha que dividem números de processo
+    const limpo = raw.replace(/-\s*\n\s*/g, '-').replace(/\n\s*\.\s*/g, '.');
     
-    const lines = text.split('\n');
-    let adicionados = 0;
-    let duplicados = 0;
+    const regexProcesso = /(\d{7}-\d{2}\.\d{4}\.8\.06\.\d{4})/g;
+    const regexData = /(\d{2}\/\d{2}\/\d{4})/g;
+    
+    const linhas = limpo.split('\n');
+    let add = 0, dup = 0;
 
-    lines.forEach(line => {
-        const numbers = line.match(procRegex);
-        const dates = line.match(dateRegex);
+    linhas.forEach(linha => {
+        const numsFound = linha.match(regexProcesso);
+        const datesFound = linha.match(regexData);
         
-        if (numbers && dates) {
-            const num = numbers[0];
-            const dateParts = dates[dates.length-1].split('/'); // Pega a última data da linha (Última Movimentação)
-            const isoDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+        if (numsFound && datesFound) {
+            const n = numsFound[0];
+            // Pega a última data da linha (geralmente a "Última Movimentação")
+            const dStr = datesFound[datesFound.length-1];
+            const dParts = dStr.split('/');
+            const isoDate = `${dParts[2]}-${dParts[1]}-${dParts[0]}`;
             
-            if (!db.find(p => p.num === num)) {
+            if(!db.find(p => p.num === n)) {
                 let col = "todo";
-                if (line.includes("Perícia") || line.includes("PERICIA") || line.includes("Curatela")) col = "siper";
+                if(linha.toUpperCase().includes("PERICIA") || linha.toUpperCase().includes("CURATELA") || linha.toUpperCase().includes("SIPER")) col = "siper";
                 
-                db.push({ id: Date.now() + Math.random(), num, task: "Extraído do Relatório", date: isoDate, col });
-                adicionados++;
-            } else { duplicados++; }
+                db.push({ id: Date.now() + Math.random(), num: n, task: "Extraído do Acervo", date: isoDate, col });
+                add++;
+            } else { dup++; }
         }
     });
 
-    save();
-    alert(`Processamento concluído!\nAdicionados: ${adicionados}\nIgnorados (já existiam): ${duplicados}`);
-    toggleParser();
+    atualizarDB();
+    alert(`Concluído!\n${add} processos novos.\n${dup} processos já cadastrados ignorados.`);
+    fecharModais();
 }
 
-function render() {
-    const columns = ['urgent', 'todo', 'siper', 'cati', 'done'];
-    columns.forEach(c => document.getElementById(c).innerHTML = '');
+function renderizar() {
+    const colunas = ['urgent', 'todo', 'siper', 'cati', 'done'];
+    colunas.forEach(c => document.getElementById(c).innerHTML = '');
     let mTotal = 0, mDone = 0;
     const hoje = new Date();
 
     db.forEach(p => {
-        const days = Math.floor((hoje - new Date(p.date)) / (86400000));
+        const dias = Math.floor((hoje - new Date(p.date)) / 86400000);
         let col = p.col;
-        const isMeta2 = days > 300;
+        const isMeta2 = dias > 300;
         
         if(isMeta2) mTotal++;
         if(isMeta2 && p.col === 'todo') col = 'urgent';
         if(isMeta2 && p.col === 'done') mDone++;
 
         const card = document.createElement('div');
-        const stagnant = (days > 20 && col !== 'done') ? 'stagnant-alert' : '';
-        card.className = `card ${isMeta2 && col !== 'done' ? 'urgent-meta' : ''} ${stagnant} ${p.col === 'siper' ? 'siper-task' : ''} ${p.col === 'cati' ? 'cati-task' : ''}`;
+        const alerta = (dias > 20 && col !== 'done') ? 'stagnant-alert' : '';
+        
+        card.className = `card ${isMeta2 && col !== 'done' ? 'urgent-meta' : ''} ${alerta} ${p.col === 'siper' ? 'siper-task' : ''} ${p.col === 'cati' ? 'cati-task' : ''}`;
         card.dataset.id = p.id;
-        card.innerHTML = `<span class="proc-num">${p.num}</span><div class="proc-task">${p.task}</div>
-            <div class="card-footer"><span>Mov: ${p.date.split('-').reverse().join('/')}</span><strong>${days}d</strong>
-            <button onclick="remove(${p.id})" style="border:none;background:none;cursor:pointer;color:#ccc;">×</button></div>`;
+        card.innerHTML = `
+            <span class="proc-num">${p.num}</span>
+            <div class="proc-task">${p.task}</div>
+            <div class="card-footer">
+                <span>Mov: ${p.date.split('-').reverse().join('/')}</span>
+                <strong>${dias} dias</strong>
+                <button onclick="remover(${p.id})" style="border:none; background:none; cursor:pointer; color:#ccc;">×</button>
+            </div>
+        `;
         document.getElementById(col).appendChild(card);
     });
 
     const perc = mTotal > 0 ? Math.round((mDone / mTotal) * 100) : 0;
     document.getElementById('meta-progress').style.width = perc + '%';
     document.getElementById('meta-perc').innerText = perc;
-    initDrag();
+    initSortable();
 }
 
-function initDrag() {
+function initSortable() {
     document.querySelectorAll('.list').forEach(l => {
         new Sortable(l, { group: 'kanban', animation: 150, onEnd: evt => {
             const id = evt.item.dataset.id;
             const idx = db.findIndex(p => p.id == id);
             db[idx].col = evt.to.id;
-            if(evt.to.id === 'done') db[idx].concludedDate = new Date().toLocaleDateString();
-            save();
+            if(evt.to.id === 'done') db[idx].dataConclusao = new Date().toLocaleDateString();
+            atualizarDB();
         }});
     });
 }
 
-function importarCargaTotal() {
-    // Lista comprimida dos 144 processos extraídos do seu PDF de 8 páginas [cite: 275, 282, 288, 318, 521]
-    const carga = [
-        {num:"0011774-26.2013.8.06.0035", task:"[EF] Pendentes RENAJUD", date:"2025-01-31"},
-        {num:"0011286-42.2011.8.06.0035", task:"[EF] Dívida Ativa", date:"2025-01-31"},
-        {num:"0051403-60.2020.8.06.0035", task:"[GAB] Minutar Sentença", date:"2025-02-11"},
-        {num:"0200587-85.2023.8.06.0035", task:"[GAB] Assinar Sentença", date:"2025-02-12"},
-        {num:"0202634-95.2024.8.06.0035", task:"[SIPER] Perícia Curatela", date:"2025-06-03", col:"siper"},
-        {num:"3003642-74.2023.8.06.0035", task:"[SEC] Paridade Salarial", date:"2025-07-04"},
-        // ... (O sistema contém a lógica para os 144 processos. Abaixo, adicionei os gatilhos para duplicidade)
-    ];
-    // Nota: Para brevidade, inseri os 10 mais críticos; o botão "Processador de Texto" permitirá que você suba todos os 144 colando o texto do PDF de uma vez.
-    alert("Inicie o 'Processador de Texto' e cole o conteúdo do seu PDF para carregar os 144 processos de uma vez com verificação de duplicidade.");
-}
-
 function exportarPDF() {
     const { jsPDF } = window.jspdf; const doc = new jsPDF(); const hoje = new Date().toLocaleDateString();
-    const concluidos = db.filter(p => p.col === 'done' && p.concludedDate === hoje);
-    if (concluidos.length === 0) return alert("Nada concluído hoje.");
+    const concluidos = db.filter(p => p.col === 'done' && p.dataConclusao === hoje);
+    if(concluidos.length === 0) return alert("Nada concluído hoje.");
     doc.text(`PRODUTIVIDADE - 2ª VARA ARACATI - ${hoje}`, 10, 10);
     doc.autoTable({ startY: 20, head: [['Processo', 'Tarefa']], body: concluidos.map(p => [p.num, p.task]) });
     doc.save(`Produtividade_${hoje}.pdf`);
 }
 
-function exportarBackup() {
+function baixarBackup() {
     const blob = new Blob([JSON.stringify(db)], {type:"application/json"});
-    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "backup_vara2.json"; link.click();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Backup_2Vara_Aracati.json`;
+    link.click();
 }
 
-function importarBackup(e) {
+function restaurarBackup(e) {
     const reader = new FileReader();
-    reader.onload = (evt) => { db = JSON.parse(evt.target.result); save(); };
+    reader.onload = (evt) => { db = JSON.parse(evt.target.result); atualizarDB(); alert("Sincronizado!"); };
     reader.readAsText(e.target.files[0]);
 }
 
-function remove(id) { if(confirm("Remover?")) { db = db.filter(p => p.id != id); save(); } }
-function limparBanco() { if(confirm("Apagar TUDO?")) { db = []; save(); } }
+function remover(id) { if(confirm("Remover?")) { db = db.filter(p => p.id != id); atualizarDB(); } }
+function limparSistema() { if(confirm("Apagar TUDO?")) { db = []; atualizarDB(); } }
 
-window.onload = render;
+window.onload = renderizar;
 </script>
 </body>
 </html>
