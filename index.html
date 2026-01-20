@@ -3,46 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão 2ª Vara - Aracati</title>
+    <title>Painel de Gestão - 2ª Vara Cível Aracati</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
     <style>
-        :root { --primary: #004a8d; --secondary: #f39c12; --danger: #e74c3c; --siper: #8e44ad; --bg: #f1f3f5; --alert-bg: #fff9e6; }
+        :root { 
+            --primary: #004a8d; --secondary: #f39c12; --danger: #e74c3c; 
+            --siper: #8e44ad; --bg: #f4f6f9; --alert-bg: #fff3cd; 
+        }
+
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        header { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-        .progress-container { flex-grow: 1; margin: 0 40px; background: rgba(255,255,255,0.2); height: 12px; border-radius: 6px; position: relative; overflow: hidden; }
+        /* Cabeçalho e Barra de Progresso */
+        header { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .progress-container { flex-grow: 1; margin: 0 40px; background: rgba(255,255,255,0.2); height: 14px; border-radius: 7px; position: relative; overflow: hidden; }
         .progress-bar { height: 100%; background: #27ae60; width: 0%; transition: width 0.5s ease; }
-        .progress-label { position: absolute; width: 100%; text-align: center; font-size: 9px; line-height: 12px; font-weight: bold; }
+        .progress-label { position: absolute; width: 100%; text-align: center; font-size: 10px; line-height: 14px; font-weight: bold; }
 
-        .toolbar { background: white; padding: 10px 20px; display: flex; gap: 10px; border-bottom: 1px solid #ddd; }
-        .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; font-size: 11px; font-weight: 600; }
+        /* Barra de Ferramentas */
+        .toolbar { background: white; padding: 10px 20px; display: flex; gap: 10px; border-bottom: 1px solid #ddd; align-items: center; }
+        .btn { padding: 8px 15px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
+        .btn-blue { background: #2c3e50; color: white; border: none; }
+        .btn-red { color: var(--danger); border-color: var(--danger); background: white; }
 
+        /* Quadro Kanban */
         .kanban-board { display: flex; gap: 15px; padding: 15px; flex-grow: 1; overflow-x: auto; align-items: flex-start; }
-        .column { background: #e9ecef; border-radius: 10px; min-width: 300px; max-height: 95%; display: flex; flex-direction: column; }
-        .column h3 { padding: 12px; margin: 0; font-size: 12px; text-transform: uppercase; color: #555; background: #dee2e6; border-radius: 10px 10px 0 0; text-align: center; }
-        .list { padding: 10px; flex-grow: 1; overflow-y: auto; min-height: 100px; }
+        .column { background: #e9ecef; border-radius: 10px; min-width: 300px; max-height: 100%; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .column h3 { padding: 12px; margin: 0; font-size: 12px; text-transform: uppercase; color: #444; background: #dee2e6; border-radius: 10px 10px 0 0; text-align: center; border-bottom: 2px solid #ccc; }
+        .list { padding: 10px; flex-grow: 1; overflow-y: auto; min-height: 150px; }
 
-        /* Estilo dos Cartões e Alertas */
-        .card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 6px solid #adb5bd; position: relative; }
+        /* Cartões e Alertas de Inatividade */
+        .card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 6px solid #adb5bd; position: relative; transition: transform 0.1s; }
+        .card:hover { transform: scale(1.02); }
         .card.urgent-meta { border-left-color: var(--danger); background: #fff5f5; }
-        .card.stagnant-alert { animation: blink-bg 2.5s infinite; border-right: 4px solid var(--secondary); }
-        @keyframes blink-bg { 0%, 100% { background-color: white; } 50% { background-color: var(--alert-bg); } }
         
-        .proc-num { font-weight: 700; color: var(--primary); font-size: 12px; display: block; margin-bottom: 4px; }
-        .proc-task { font-size: 11px; color: #444; }
-        .card-footer { display: flex; justify-content: space-between; margin-top: 10px; font-size: 10px; color: #888; border-top: 1px solid #eee; padding-top: 5px; }
+        /* Alerta Inatividade > 20 dias */
+        .card.stagnant-alert { animation: blink-bg 3s infinite; border-right: 5px solid var(--secondary); }
+        @keyframes blink-bg { 0%, 100% { background: white; } 50% { background: var(--alert-bg); } }
 
-        /* Modal de Cadastro (Oculto por padrão) */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 350px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
-        .modal-content h2 { margin: 0 0 20px 0; font-size: 18px; color: var(--primary); }
+        .card.siper-task { border-left-color: var(--siper); }
+        .card.cati-task { border-left-color: var(--secondary); }
+        
+        .proc-num { font-weight: bold; color: var(--primary); font-size: 12px; display: block; margin-bottom: 5px; }
+        .proc-task { font-size: 11px; color: #333; line-height: 1.4; }
+        .card-footer { display: flex; justify-content: space-between; margin-top: 10px; font-size: 10px; color: #777; border-top: 1px solid #eee; padding-top: 6px; }
+
+        /* Modal e Botão Flutuante */
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 350px; }
         input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-
-        /* Botão Flutuante (FAB) */
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 999; transition: transform 0.2s; }
-        .fab:hover { transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -57,9 +70,13 @@
 </header>
 
 <div class="toolbar">
-    <button class="btn btn-primary" onclick="importarRelatorioCompleto()">Importar Acervo Relatório</button>
+    <button class="btn" onclick="importarRelatorioCompleto()" style="background:var(--primary); color:white; border:none;">Importar Acervo Relatório</button>
     <button class="btn" onclick="exportarPDF()">Exportar PDF Diário</button>
-    <button class="btn" onclick="limparBanco()" style="color: var(--danger); border-color: var(--danger); margin-left: auto;">Limpar Dados</button>
+    <button class="btn btn-blue" onclick="exportarBackup()">💾 Baixar Backup</button>
+    <label class="btn" style="background:#95a5a6; color:white; cursor:pointer;">
+        📂 Restaurar Backup <input type="file" id="importFile" onchange="importarBackup(event)" style="display:none;">
+    </label>
+    <button class="btn btn-red" onclick="limparBanco()" style="margin-left:auto;">Limpar Tudo</button>
 </div>
 
 <div class="kanban-board">
@@ -74,9 +91,9 @@
 
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
-        <h2>Novo Processo</h2>
+        <h3 style="margin-top:0; color:var(--primary);">Novo Processo</h3>
         <input type="text" id="pNum" placeholder="Número do Processo">
-        <input type="text" id="pTask" placeholder="Assunto (Ex: [GAB] Sentença)">
+        <input type="text" id="pTask" placeholder="Tarefa (Ex: [GAB] Sentença)">
         <input type="date" id="pDate">
         <select id="pCol">
             <option value="todo">Fila Comum</option>
@@ -90,6 +107,168 @@
     </div>
 </div>
 
-<script src="script.js"></script>
+<script>
+let db = JSON.parse(localStorage.getItem('vara_aracati_acervo')) || [];
+
+function toggleModal() {
+    const m = document.getElementById('modalOverlay');
+    m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+}
+
+function save() {
+    localStorage.setItem('vara_aracati_acervo', JSON.stringify(db));
+    render();
+}
+
+function adicionarProcesso() {
+    const num = document.getElementById('pNum').value;
+    const task = document.getElementById('pTask').value;
+    const date = document.getElementById('pDate').value;
+    const col = document.getElementById('pCol').value;
+
+    if(!num || !date) return alert("Número e Data são obrigatórios.");
+    
+    // Verificação de Duplicidade
+    if(db.find(p => p.num === num)) {
+        return alert("Este processo já está cadastrado no seu painel.");
+    }
+
+    db.push({ id: Date.now(), num, task, date, col, concludedDate: null });
+    save();
+    toggleModal();
+    document.getElementById('pNum').value = '';
+    document.getElementById('pTask').value = '';
+}
+
+function render() {
+    const columns = ['urgent', 'todo', 'siper', 'cati', 'done'];
+    columns.forEach(c => document.getElementById(c).innerHTML = '');
+    
+    let metaTotal = 0, metaDone = 0;
+    const hoje = new Date();
+
+    db.forEach(p => {
+        const days = Math.floor((hoje - new Date(p.date)) / (1000 * 60 * 60 * 24));
+        let col = p.col;
+
+        const isMeta2 = days > 300;
+        if(isMeta2) metaTotal++;
+        if(isMeta2 && p.col === 'todo') col = 'urgent';
+        if(isMeta2 && p.col === 'done') metaDone++;
+
+        const card = document.createElement('div');
+        const stagnant = (days > 20 && col !== 'done') ? 'stagnant-alert' : '';
+        
+        card.className = `card ${isMeta2 && col !== 'done' ? 'urgent-meta' : ''} ${stagnant} ${p.col === 'siper' || p.task.includes('Perícia') ? 'siper-task' : ''} ${p.col === 'cati' ? 'cati-task' : ''}`;
+        card.dataset.id = p.id;
+        card.innerHTML = `
+            <span class="proc-num">${p.num}</span>
+            <div class="proc-task">${p.task}</div>
+            <div class="card-footer">
+                <span>Mov: ${p.date.split('-').reverse().join('/')}</span>
+                <strong>${days}d</strong>
+                <button onclick="remove(${p.id})" style="border:none; background:none; cursor:pointer; color:#ccc;">×</button>
+            </div>
+        `;
+        document.getElementById(col).appendChild(card);
+    });
+
+    const perc = metaTotal > 0 ? Math.round((metaDone / metaTotal) * 100) : 0;
+    document.getElementById('meta-progress').style.width = perc + '%';
+    document.getElementById('meta-perc').innerText = perc;
+    initDrag();
+}
+
+function initDrag() {
+    document.querySelectorAll('.list').forEach(l => {
+        new Sortable(l, { group: 'kanban', animation: 150, onEnd: evt => {
+            const id = evt.item.dataset.id;
+            const idx = db.findIndex(p => p.id == id);
+            const target = evt.to.id;
+            db[idx].col = target;
+            if(target === 'done') db[idx].concludedDate = new Date().toLocaleDateString();
+            save();
+        }});
+    });
+}
+
+function importarRelatorioCompleto() {
+    const acervo = [
+        // Página 1: Gargalo Meta 2 e Execuções Fiscais
+        { num: "0011774-26.2013.8.06.0035", task: "[EF] Pendentes análise RENAJUD", date: "2025-01-31", col: "todo" },
+        { num: "0011286-42.2011.8.06.0035", task: "[EF] Dívida Ativa", date: "2025-01-31", col: "todo" },
+        { num: "0051403-60.2020.8.06.0035", task: "[GAB] Minutar Sentença", date: "2025-02-11", col: "todo" },
+        { num: "0200587-85.2023.8.06.0035", task: "[GAB] Assinar Sentença", date: "2025-02-12", col: "todo" },
+        { num: "0050268-76.2021.8.06.0035", task: "[GAB] Minutar Sentença", date: "2025-02-13", col: "todo" },
+        { num: "0200235-64.2022.8.06.0035", task: "[GAB] Minutar Sentença", date: "2025-02-14", col: "todo" },
+        { num: "0051081-50.2014.8.06.0035", task: "[GAB] Minutar Sentença", date: "2025-02-19", col: "todo" },
+        { num: "0201116-41.2022.8.06.0035", task: "[GAB] Minutar Sentença", date: "2025-02-21", col: "todo" },
+        { num: "0050214-47.2020.8.06.0035", task: "[GAB] Minutar Sentença", date: "2025-02-22", col: "todo" },
+        { num: "0013705-25.2017.8.06.0035", task: "[GAB] Minutar Sentença", date: "2025-02-22", col: "todo" },
+
+        // Página 2-4: SIPER e Perícias Curatela/Interdição
+        { num: "0202634-95.2024.8.06.0035", task: "[SIPER] Nomeação Curatela", date: "2025-06-03", col: "siper" },
+        { num: "0000297-95.2018.8.06.0078", task: "[SIPER] Gerenciar Perícia", date: "2025-06-04", col: "siper" },
+        { num: "0051083-73.2021.8.06.0035", task: "[SIPER] Gerenciar Perícia", date: "2025-06-06", col: "siper" },
+        { num: "0200490-85.2023.8.06.0035", task: "[SIPER] Gerenciar Perícia", date: "2025-06-16", col: "siper" },
+        { num: "0201013-34.2022.8.06.0035", task: "[SIPER] Gerenciar Perícia", date: "2025-06-20", col: "siper" },
+
+        // Página 5-8: Secretaria e Expedientes Diversos
+        { num: "3003642-74.2023.8.06.0035", task: "[SEC] Paridade Salarial", date: "2025-07-04", col: "todo" },
+        { num: "3002400-46.2024.8.06.0035", task: "[SEC] PASEP", date: "2025-07-15", col: "todo" },
+        { num: "3001745-40.2025.8.06.0035", task: "[SEC] Testamento", date: "2025-07-22", col: "todo" },
+        { num: "3002282-36.2025.8.06.0035", task: "[SEC] Internação Compulsória", date: "2025-07-22", col: "todo" }
+    ];
+
+    acervo.forEach(a => {
+        if(!db.find(p => p.num === a.num)) db.push({ id: Date.now() + Math.random(), ...a });
+    });
+    save();
+}
+
+function exportarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const hoje = new Date().toLocaleDateString();
+    const concluidos = db.filter(p => p.col === 'done' && p.concludedDate === hoje);
+    
+    if (concluidos.length === 0) return alert("Nenhum processo concluído hoje.");
+
+    doc.setFontSize(14); doc.text("PRODUTIVIDADE - 2ª VARA CÍVEL ARACATI", 105, 15, {align:"center"});
+    doc.setFontSize(10); doc.text(`Diretora: Raiane Lima | Data: ${hoje}`, 105, 22, {align:"center"});
+    
+    doc.autoTable({
+        startY: 30,
+        head: [['Processo', 'Tarefa', 'Status']],
+        body: concluidos.map(p => [p.num, p.task, 'CONCLUÍDO'])
+    });
+    doc.save(`Produtividade_${hoje.replace(/\//g,'-')}.pdf`);
+}
+
+function exportarBackup() {
+    const blob = new Blob([JSON.stringify(db, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Backup_2Vara_Aracati.json`;
+    link.click();
+}
+
+function importarBackup(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        db = JSON.parse(evt.target.result);
+        save();
+    };
+    reader.readAsText(file);
+}
+
+function remove(id) { if(confirm("Remover processo?")) { db = db.filter(p => p.id != id); save(); } }
+function limparBanco() { if(confirm("Apagar TUDO?")) { db = []; save(); } }
+
+window.onload = render;
+</script>
 </body>
 </html>
