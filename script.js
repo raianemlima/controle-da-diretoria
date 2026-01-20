@@ -1,86 +1,94 @@
-let processes = JSON.parse(localStorage.getItem('vara_aracati_db')) || [];
+// Banco de dados local com suporte a data de conclusão
+let db = JSON.parse(localStorage.getItem('vara2_db')) || [];
 
-document.getElementById('addBtn').addEventListener('click', () => {
-    const num = document.getElementById('procNum').value;
-    const task = document.getElementById('procTask').value;
-    const date = document.getElementById('procDate').value;
-    const column = document.getElementById('procCol').value;
-
-    if (!num || !date) return alert("Preencha o número e a data da última movimentação.");
-
-    processes.push({ id: Date.now(), num, task, date, column });
-    saveAndRender();
-});
-
-function calculateDays(dateString) {
-    const diff = Math.floor((new Date() - new Date(dateString)) / (1000 * 60 * 60 * 24));
-    return diff;
+function save() { 
+    localStorage.setItem('vara2_db', JSON.stringify(db)); 
+    render(); 
 }
 
-function saveAndRender() {
-    localStorage.setItem('vara_aracati_db', JSON.stringify(processes));
-    render();
-}
+function render(filter = 'all') {
+    const lists = ['todo', 'siper', 'urgent', 'cati', 'done'];
+    lists.forEach(l => document.getElementById(l).innerHTML = '');
+    let counts = { urgent: 0, siper: 0, cati: 0 };
 
-function render() {
-    const columns = ['todo', 'siper', 'urgent', 'cati', 'done'];
-    columns.forEach(id => document.getElementById(id).innerHTML = '');
+    db.forEach(p => {
+        if(filter !== 'all' && !p.task.toUpperCase().includes(filter)) return;
 
-    processes.forEach(p => {
-        const days = calculateDays(p.date);
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.dataset.id = p.id;
+        const days = Math.floor((new Date() - new Date(p.date)) / (1000 * 60 * 60 * 24));
+        let finalCol = p.col;
         
-        if (days > 300 && p.column !== 'done') card.classList.add('ancient');
-        if (p.column === 'siper' || p.task.toLowerCase().includes('pericia')) card.classList.add('siper-task');
-        if (p.column === 'cati') card.classList.add('cati-task');
+        // Lógica de Meta 2: Processos parados há mais de 300 dias (Relatório Jan/2026)
+        if(days > 300 && p.col === 'todo') finalCol = 'urgent';
+        
+        if(finalCol === 'urgent') counts.urgent++;
+        if(finalCol === 'siper') counts.siper++;
+        if(finalCol === 'cati') counts.cati++;
 
+        const card = document.createElement('div');
+        card.className = `card ${days > 300 ? 'meta2' : ''} ${finalCol === 'siper' ? 'siper-task' : ''} ${finalCol === 'cati' ? 'cati-task' : ''}`;
+        card.dataset.id = p.id;
         card.innerHTML = `
-            <span class="delete-btn" onclick="removeProc(${p.id})">×</span>
-            <span class="title">${p.num}</span>
-            <span class="desc">${p.task}</span>
-            <span class="days">Parado há ${days} dias</span>
+            <span class="badge">${days > 300 ? 'META 2' : 'URGENTE'}</span>
+            <span class="proc-num">${p.num}</span>
+            <div class="proc-task">${p.task}</div>
+            <div class="proc-footer">
+                <span>Últ. Mov: ${p.date.split('-').reverse().join('/')}</span>
+                <strong>${days} dias</strong>
+                <button onclick="remove(${p.id})" style="border:none; background:none; cursor:pointer;">×</button>
+            </div>
         `;
-
-        let targetCol = p.column;
-        if (days > 300 && p.column === 'todo') targetCol = 'urgent';
-
-        document.getElementById(targetCol).appendChild(card);
+        document.getElementById(finalCol).appendChild(card);
     });
-    initDragAndDrop();
+
+    document.getElementById('count-urgent').innerText = counts.urgent;
+    document.getElementById('count-siper').innerText = counts.siper;
+    document.getElementById('count-cati').innerText = counts.cati;
+    initDrag();
 }
 
-function initDragAndDrop() {
-    document.querySelectorAll('.list').forEach(list => {
-        new Sortable(list, {
-            group: 'kanban',
-            animation: 150,
-            onEnd: (evt) => {
+function initDrag() {
+    document.querySelectorAll('.list').forEach(l => {
+        new Sortable(l, { 
+            group: 'kanban', 
+            animation: 150, 
+            onEnd: evt => {
                 const id = evt.item.dataset.id;
-                const index = processes.findIndex(p => p.id == id);
-                processes[index].column = evt.to.id;
-                localStorage.setItem('vara_aracati_db', JSON.stringify(processes));
+                const idx = db.findIndex(p => p.id == id);
+                const targetCol = evt.to.id;
+                
+                db[idx].col = targetCol;
+                
+                // Se movido para Concluído, registra a data de hoje
+                if(targetCol === 'done') {
+                    db[idx].concludedDate = new Date().toLocaleDateString();
+                }
+                save();
             }
         });
     });
 }
 
-function carregarAcervoPorAssunto() {
-    const dados = [
-        { num: "0011774-26.2013.8.06.0035", task: "EF - RENAJUD", date: "2025-01-31", column: "todo" },
-        { num: "0011286-42.2011.8.06.0035", task: "EF - Dívida Ativa", date: "2025-01-31", column: "todo" },
-        { num: "0202634-95.2024.8.06.0035", task: "Perícia Curatela", date: "2025-06-03", column: "siper" }
-    ];
-    dados.forEach(d => {
-        if (!processes.find(p => p.num === d.num)) processes.push({ id: Date.now() + Math.random(), ...d });
+// NOVA FUNÇÃO: Resumo de Produtividade Diária
+function gerarResumoProdutividade() {
+    const hoje = new Date().toLocaleDateString();
+    const concluidosHoje = db.filter(p => p.col === 'done' && p.concludedDate === hoje);
+    
+    if (concluidosHoje.length === 0) {
+        alert("Nenhum processo foi movido para 'Concluído' hoje.");
+        return;
+    }
+
+    let resumo = `--- RESUMO DE PRODUTIVIDADE DIÁRIA ---\n`;
+    resumo += `Unidade: 2ª Vara Cível de Aracati\n`;
+    resumo += `Diretora: Raiane Lima (Matrícula: 54849)\n`;
+    resumo += `Data: ${hoje}\n\n`;
+    resumo += `Total de Processos Impulsionados: ${concluidosHoje.length}\n\n`;
+    resumo += `Lista de Processos:\n`;
+    
+    concluidosHoje.forEach(p => {
+        resumo += `- ${p.num} (${p.task})\n`;
     });
-    saveAndRender();
-}
 
-function removeProc(id) {
-    processes = processes.filter(p => p.id != id);
-    saveAndRender();
+    console.log(resumo);
+    alert(resumo);
 }
-
-window.onload = render;
