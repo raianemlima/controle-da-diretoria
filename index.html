@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão 2ª Vara Cível - Aracati</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+
+<header class="main-header">
+    <h1>Painel de Controle de Expedientes</h1>
+    <p>Diretora: Raiane Maiara de Lima | Juiz Titular: Dr. Ramon</p>
+</header>
+
+<section class="form-container">
+    <div class="input-box">
+        <label>Nº do Processo</label>
+        <input type="text" id="procNum" placeholder="Ex: 0011774-26.2013...">
+    </div>
+    <div class="input-box">
+        <label>Tarefa / Fila PJE</label>
+        <input type="text" id="procTask" placeholder="Ex: Minutar Sentença">
+    </div>
+    <div class="input-box">
+        <label>Última Movimentação</label>
+        <input type="date" id="procDate">
+    </div>
+    <button id="addBtn">Adicionar Processo</button>
+</section>
+
+<main class="kanban-board">
+    <div class="column">
+        <h3>Para Fazer</h3>
+        <div class="list" id="todo"></div>
+    </div>
+    <div class="column">
+        <h3>SIPER (Perícias)</h3>
+        <div class="list" id="siper"></div>
+    </div>
+    <div class="column">
+        <h3>Gargalo (>300 dias)</h3>
+        <div class="list" id="urgent"></div>
+    </div>
+    <div class="column">
+        <h3>Concluído</h3>
+        <div class="list" id="done"></div>
+    </div>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
